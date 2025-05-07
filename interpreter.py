@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import os
 import sys
+import argparse
 from enum import Enum
 
 class Token(Enum):
@@ -23,7 +24,6 @@ ALLOWED_CHARS = {'<': Token.SHIFT_LEFT, '>': Token.SHIFT_RIGHT, '+': Token.INCRE
                  '[': Token.START_LOOP, ']': Token.END_LOOP}
 
 assert len(ALLOWED_CHARS) == 8
-
 
 def lex(raw: str) -> list[Token]:
     program = []
@@ -67,7 +67,7 @@ def skip_loop(ip: int, token_stream: list[Token]) -> int:
 
     return ip
 
-def parse_and_execute(token_stream: list[Token], memory_state: list[int]):
+def parse_and_execute(token_stream: list[Token], memory_state: list[int], print_as_nums: bool = False):
     ptr = 0
     mem_size = len(memory_state)
     loop_stack = []
@@ -85,10 +85,10 @@ def parse_and_execute(token_stream: list[Token], memory_state: list[int]):
             case Token.DECREMENT:
                 memory_state[ptr] = (memory_state[ptr] - 1) % 256
             case Token.OUT:
-                print(chr(memory_state[ptr]), end="")
+                print(chr(memory_state[ptr]), end="") if not print_as_nums else print(memory_state[ptr], end="")
             case Token.IN:
                 try:
-                    memory_state[ptr] = ord(input("Input a single character"))
+                    memory_state[ptr] = ord(input("Input a single character: ")) if not print_as_nums else input("Input a number from 0-255: ")
                 except TypeError:
                     print("Invalid character given, terminated")
                     sys.exit(1)
@@ -111,21 +111,24 @@ def parse_and_execute(token_stream: list[Token], memory_state: list[int]):
 
 
 def main():
-    if len(sys.argv) < 1:
-        print("Usage: python interpreter.py /path/to/script")
-        sys.exit(1)
-    
-    path = sys.argv[1]
+    arg_parser = argparse.ArgumentParser(
+        prog="bf interpreter",
+        description="An interpreter for the brainf**k language"
+    )
+    arg_parser.add_argument("script")
+    arg_parser.add_argument('-m', '--memory_size', type=int)
+    arg_parser.add_argument('-n', '--nums', action='store_true')
+    args = arg_parser.parse_args()
+
+    path: str = args.script
     if not os.path.isfile(path) or path.split("/")[-1][-3:] != '.bf':
-        print("Invalid path or file given")
+        print("Invalid path or file given.")
     
     raw_text = None
     with open(path) as f:
         raw_text = f.read()
     
-    mem_size = sys.argv[2] if len(sys.argv) > 2 else 30000
-    # if len(sys.argv) > 2:
-    #     mem_size = sys.argv[2]
+    mem_size = args.memory_size if args.memory_size is not None else 30000
     mem_state = [0] * mem_size
     try:
         token_stream = lex(raw_text)
@@ -133,7 +136,10 @@ def main():
         print(e.msg)
         sys.exit(1)
 
-    parse_and_execute(token_stream, mem_state)
+    try:
+        parse_and_execute(token_stream, mem_state, args.nums)
+    except KeyboardInterrupt:
+        print("Interrupted")
 
 
 main()
