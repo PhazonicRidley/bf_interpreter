@@ -1,15 +1,16 @@
 # bf_interpreter
 
-An interpreter for the language that mimics a Turing Machine with bytes written in python
+An interpreter for the language that mimics a Turing Machine with bytes written in python<br/>
 
-usage: bf interpreter [-h] [-m MEMORY_SIZE] [-n] script
+usage: bf interpreter [-h] [-m MEMORY_SIZE] [-n] script<br/>
 
-An interpreter for the brainf**k language
+An interpreter for the brainf**k language<br/>
 
-positional arguments:
-  script
+positional arguments:<br/>
+  script<br/>
 
-options:
-  -h, --help            show this help message and exit
-  -m, --memory_size MEMORY_SIZE
-  -n, --nums
+options:<br/>
+  -h, --help            show this help message and exit<br/>
+  -m, --memory_size MEMORY_SIZE<br/>
+  -n, --nums<br/>
+  
